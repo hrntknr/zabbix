@@ -1,0 +1,61 @@
+version: '3.1'
+
+services:
+  zabbixdb:
+    image: monitoringartist/zabbix-db-mariadb:latest
+    volumes:
+      - ./zabbixdb-storage:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - MARIADB_USER=zabbix
+      - MARIADB_PASS=password
+    expose:
+      - 3306
+    networks:
+      app_net:
+        ipv4_address: 172.16.36.2
+
+  zabbix:
+    image: monitoringartist/zabbix-xxl:latest
+    depends_on:
+      - zabbixdb
+    ports:
+      - "80:80"
+      - "10051:10051"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - ZS_DBHost=zabbixdb
+      - ZS_DBUser=zabbix
+      - ZS_DBPassword=password
+    networks:
+      app_net:
+        ipv4_address: 172.16.36.3
+
+  zabbixagent:
+    image: monitoringartist/dockbix-agent-xxl-limited:latest
+    depends_on:
+      - zabbix
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+    expose:
+      - 10050
+    environment:
+      - ZA_Server=0.0.0.0/0
+    restart: unless-stopped
+    networks:
+      app_net:
+        ipv4_address: 172.16.36.4
+
+volumes:
+  zabbixdb-storage:
+    driver: local
+
+networks:
+  app_net:
+    driver: bridge
+    ipam:
+     driver: default
+     config:
+       - subnet: 172.16.36.0/24
