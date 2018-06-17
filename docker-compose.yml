@@ -32,22 +32,6 @@ services:
       app_net:
         ipv4_address: 172.16.36.3
 
-  zabbixagent:
-    image: monitoringartist/dockbix-agent-xxl-limited:latest
-    depends_on:
-      - zabbix
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-    expose:
-      - 10050
-    environment:
-      - ZA_Server=0.0.0.0/0
-    restart: unless-stopped
-    networks:
-      app_net:
-        ipv4_address: 172.16.36.4
-
 volumes:
   zabbixdb-storage:
     driver: local
