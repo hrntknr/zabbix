@@ -21,8 +21,9 @@ services:
     depends_on:
       - zabbixdb
     ports:
-      - "80:80"
-      - "10051:10051"
+      - "::1:80:80"
+    expose:
+      - 10051
     volumes:
       - /etc/localtime:/etc/localtime:ro
     environment:
